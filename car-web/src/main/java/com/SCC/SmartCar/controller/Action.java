@@ -1,10 +1,9 @@
 package com.SCC.SmartCar.controller;
 
-import com.SCC.SmartCar.model.IOConstants;
-import com.SCC.SmartCar.model.Map;
-import com.SCC.SmartCar.model.ResponseMessage;
-import com.SCC.SmartCar.model.Trip;
+import com.SCC.SmartCar.dao.RedisDao;
+import com.SCC.SmartCar.model.*;
 import com.SCC.SmartCar.service.CarIoService;
+import com.SCC.SmartCar.service.IAutodriveService;
 import com.SCC.SmartCar.service.IEnvironmentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * Created by ZJDX on 2016/6/25.
@@ -25,7 +26,10 @@ public class Action {
     CarIoService carService;
     @Autowired
     IEnvironmentService environmentService;
-
+    @Autowired
+    IAutodriveService autodriveService;
+    @Autowired
+    RedisDao redisDao;
     @RequestMapping(value = "/startAutoPark", method = RequestMethod.GET)
     public void startAutoPark(){
         logger.debug("run");
@@ -42,17 +46,22 @@ public class Action {
         System.out.println(e.getMessage().toString());
         }
     }
-
+    @RequestMapping(value = "/getCurrentPosition", method = RequestMethod.GET)
+    public Coordinate mouseClickPoint() {
+       // CarRuntimeInfo carRuntimeInfo=(CarRuntimeInfo)redisDao.LRange("carRuntimeInfo_list:"+"1",0,1).get(0);
+        CarRuntimeInfo carRuntimeInfo=(CarRuntimeInfo)redisDao.LIndex("carRuntimeInfo_list:"+"1",0);
+        Coordinate coordinate=carRuntimeInfo.getCoordinate();
+        return coordinate;
+    }
     //获取前台设置的起始点和终点，将路径发送给车服务器生成路径并解析成指令
     @RequestMapping(value = "/startAuto", method = RequestMethod.POST)
-    public ResponseMessage startAuto(@RequestBody Trip trip) {
+    public Path startAuto(@RequestBody Trip trip) {
         Map map=environmentService.getMap(trip.getMapID());
-
-
-        ResponseMessage responseMessage=new ResponseMessage();
-        responseMessage.setMessage("success!");
+        int pathId=autodriveService.createPath(trip.getCarId(),trip.getStartPoint(),trip.getEndPoint(),map);
+        Path path=(Path)redisDao.readPath(String.valueOf(trip.getCarId()));
+        List<Coordinate> points =path.getPoints();
         System.out.println("path:" + trip.getStartPoint().toString() + "," + trip.getEndPoint().toString()+" mapID:"+trip.getMapID());
-        return  responseMessage;
+        return  path;
     }
 
 }
