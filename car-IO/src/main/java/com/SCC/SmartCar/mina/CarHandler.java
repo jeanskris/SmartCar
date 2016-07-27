@@ -49,12 +49,13 @@ public class CarHandler {
         carRuntimeInfo.setCarId((Integer)json.get("carId"));
         carRuntimeInfo.setCoordinate(new Coordinate((Double)json.get("location_x"),(Double)json.get("location_y")));
         carRuntimeInfo.setSpeed((Integer)json.get("speed_current"));
-        carRuntimeInfo.setCurrentTime(sdf.parse(json.get("currentTime").toString()));
+        carRuntimeInfo.setCurrentTime(sdf.parse(json.get("currentTime").toString()).getTime());
         //redisDao.delete(Integer.toString((Integer)json.get("carId")));
-        redisDao.LPush(Integer.toString((Integer)json.get("carId")),carRuntimeInfo);
+        //carRuntimeInfo= (CarRuntimeInfo)redisDao.LPop("0");
+        redisDao.LPush("carRuntimeInfo_list:"+Integer.toString((Integer)json.get("carId")),carRuntimeInfo);
 
-        List<CarRuntimeInfo> list=(List<CarRuntimeInfo>)redisDao.LRange(Integer.toString((Integer)json.get("carId")),0,-1);
-        redisPublisher.Publish("1:topic",carRuntimeInfo);
+        List<CarRuntimeInfo> list=(List<CarRuntimeInfo>)redisDao.LRange("carRuntimeInfo_list:"+Integer.toString((Integer)json.get("carId")),0,-1);
+        redisPublisher.Publish(Integer.toString((Integer)json.get("carId"))+":topic",carRuntimeInfo);
         try {
 
             String currentTime=json.get("currentTime").toString();
