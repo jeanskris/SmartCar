@@ -41,6 +41,15 @@ public class RedisDao {
         RedisOperations<String, Object> RedisOperations  = valueOper.getOperations();
         RedisOperations.delete(key);
     }
+    public void savePath(String carId,Object object) {
+        logger.info("savePath:"+carId);
+        ValueOperations<String, Object> valueOper = redisTemplate.opsForValue();
+        valueOper.set("path:"+carId, object);
+    }
+    public Object readPath(String carId) {
+        ValueOperations<String, Object> valueOper = redisTemplate.opsForValue();
+        return valueOper.get("path:"+carId);
+    }
     public void LPush(String key,Object object){
         ListOperations<String, Object> listOps = redisTemplate.opsForList();
         listOps.rightPush(key, object);
