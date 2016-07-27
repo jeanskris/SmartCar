@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <!-- TCP -->
+    <!--此部分被 NioSocketAcceptor 隐式使用，无此则会报字符串无法转换成 InetSocketAddress -->
+    <bean id="customEditorConfigurer"
+          class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+        <property name="customEditors">
+            <map>
+                <entry key="java.net.SocketAddress"
+                       value="org.apache.mina.integration.beans.InetSocketAddressEditor" />
+            </map>
+        </property>
+    </bean>
+    <!-- 业务处理逻辑 -->
+    <bean id="tcpServerHandler" class="com.SCC.SmartCar.mina.TCPServerHandler"/>
+    <bean id="carHandler" class="com.SCC.SmartCar.mina.CarHandler"/>
+    <!-- 监听端口 -->
+    <bean id="tcpAddress" class="com.SCC.SmartCar.mina.ServerIpTCP"/>
+    <!-- Mina自带日志过滤器 默认级别为debug -->
+    <bean id="loggingFilter" class="org.apache.mina.filter.logging.LoggingFilter"/>
+    <!-- 累加数据包解码器：解断丢包、粘包问题 -->
+    <bean id="codecFilter" class="org.apache.mina.filter.codec.ProtocolCodecFilter">
+        <constructor-arg>
+            <bean class="com.SCC.SmartCar.mina.MyCodecFactory"/>
+        </constructor-arg>
+    </bean>
+
+    <bean id="filterChainBuilder"
+          class="org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder">
+        <property name="filters">
+            <map>
+                <entry key="loggingFilter" value-ref="loggingFilter"/>
+                <!--<entry key="codecFilter" value-ref="codecFilter"/>-->
+            </map>
+        </property>
+    </bean>
+    <bean id="TCPAcceptor" class="org.apache.mina.transport.socket.nio.NioSocketAcceptor"
+          init-method="bind" destroy-method="unbind">
+        <property name="defaultLocalAddress" ref="tcpAddress"/>
+        <property name="handler" ref="tcpServerHandler"/>
+        <property name="filterChainBuilder" ref="filterChainBuilder"/>
+        <property name="reuseAddress" value="true"/>
+    </bean>
+</beans>

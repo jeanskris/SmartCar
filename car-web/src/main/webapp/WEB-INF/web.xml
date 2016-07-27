@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>
+            classpath:applicationContext.xml
+            /WEB-INF/dispatcher-servlet.xml
+        </param-value>
+    </context-param>
+    <!--log4j配置-->
+    <context-param>
+        <param-name> log4jConfigLocation</param-name>
+        <param-value>classpath*:log4j.properties</param-value>
+    </context-param>
+    <context-param>
+        <param-name> log4jRefreshInterval</param-name>
+        <param-value>1000</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+    <!-- 如上配置是Spring集成Web环境的通用配置；
+    一般用于加载除Web层的Bean（如DAO、Service等），以便于与其他任何Web框架集成。
+  contextConfigLocation：表示用于加载Bean的配置文件；
+  contextClass：表示用于加载Bean的ApplicationContext实现类，默认WebApplicationContext。-->
+    <servlet>
+        <servlet-name>dispatcher</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+        <async-supported>true</async-supported>
+        <!--load-on-startup：表示启动容器时初始化该Servlet；-->
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>dispatcher</servlet-name>
+        <url-pattern>/</url-pattern>
+        <!--url-pattern：表示哪些请求交给Spring Web MVC处理，
+        “/” 是用来定义默认servlet映射的。
+        也可以如“*.html”表示拦截所有以html为扩展名的请求。-->
+    </servlet-mapping>
+
+
+    <welcome-file-list>
+        <welcome-file>/WEB-INF/pages/index.jsp</welcome-file>
+    </welcome-file-list>
+
+</web-app>

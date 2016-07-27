@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <!-- 引入properties配置文件 -->
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:*.properties</value>
+                <!--要是有多个配置文件，只需在这里继续添加即可 -->
+            </list>
+        </property>
+    </bean>
+    <!-- jedis 配置 -->
+    <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig" >
+        <property name="maxIdle" value="${redis.maxIdle}" />
+        <property name="maxWaitMillis" value="${redis.maxWait}" />
+        <property name="testOnBorrow" value="${redis.testOnBorrow}" />
+    </bean >
+
+    <!-- redis服务器中心 -->
+    <bean id="connectionFactory"  class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory" >
+        <property name="poolConfig" ref="poolConfig" />
+        <property name="port" value="${redis.port}" />
+        <property name="hostName" value="${redis.host}" />
+        <!-- <property name="password" value="${redis.password}" /> -->
+        <property name="timeout" value="${redis.timeout}" ></property>
+    </bean >
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate" >
+        <property name="connectionFactory" ref="connectionFactory" />
+        <property name="keySerializer" >
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+        </property>
+        <property name="valueSerializer" >
+            <bean class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer" />
+        </property>
+
+    </bean >
+    <bean id="stringRedisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate">
+        <property name="connectionFactory" ref="connectionFactory" />
+    </bean>
+    <!-- SDR Pub/Sub配置 -->
+    <!-- RedisMessageListener是实现了MessageListener接口的类，MessageListener接口中定义了onMessage方法，也就是接收消息的方法，每当Channel中有消息，onMessage方法会被自动调用， -->
+    <bean id="messageListener" class="com.SCC.SmartCar.model.RedisMessageListener">
+    </bean>
+
+    <!-- 可以有多个messageListener，每个messageListener必须注册到RedisMessageListenerContainer中，读者可参阅API文档 -->
+    <bean id="messageContainer"
+          class="org.springframework.data.redis.listener.RedisMessageListenerContainer"
+          destroy-method="destroy">
+        <property name="connectionFactory" ref="connectionFactory" />
+        <!--<property name="taskExecutor"> <bean class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler">
+<property name="poolSize" value="3"></property> </bean> </property>
+此处可以定义Executor，参阅java.util.concurrent.Executor-->
+        <property name="messageListeners">
+            <map>
+                <entry key-ref="messageListener">
+                    <ref bean="channelTopic" />
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+    <!-- Channel设置 -->
+    <bean id="channelTopic" class="org.springframework.data.redis.listener.ChannelTopic">
+        <constructor-arg value="1:topic" />
+    </bean>
+</beans>
