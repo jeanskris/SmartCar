@@ -52,11 +52,21 @@ public class RedisDao {
     }
     public void LPush(String key,Object object){
         ListOperations<String, Object> listOps = redisTemplate.opsForList();
-        listOps.rightPush(key, object);
+        listOps.leftPush(key, object);
     }
     public List<?> LRange(String key, long start, long end){
         ListOperations<String, Object> listOps = redisTemplate.opsForList();
         List<?> list=listOps.range(key,start,end);
         return  list;
+    }
+    public Object LPop(String key){
+        ListOperations<String, Object> listOps = redisTemplate.opsForList();
+        Object obj=listOps.leftPop(key);
+        return  obj;
+    }
+    public Object LIndex(String key,long index){
+        ListOperations<String, Object> listOps = redisTemplate.opsForList();
+        Object obj=listOps.index(key,index);
+        return  obj;
     }
 }
