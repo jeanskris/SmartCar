@@ -3,7 +3,6 @@ package com.SCC.SmartCar.model;
 import org.springframework.stereotype.Repository;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * Created by ZJDX on 2016/7/24.
@@ -16,7 +15,7 @@ public class CarRuntimeInfo implements Serializable{
     private double speed;
     private double acceleration;
     private double angel;
-    private Date currentTime;
+    private Long currentTime;
     public Coordinate getCoordinate() {
         return coordinate;
     }
@@ -49,11 +48,11 @@ public class CarRuntimeInfo implements Serializable{
         this.carId = carId;
     }
 
-    public Date getCurrentTime() {
+    public Long getCurrentTime() {
         return currentTime;
     }
 
-    public void setCurrentTime(Date currentTime) {
+    public void setCurrentTime(Long currentTime) {
         this.currentTime = currentTime;
     }
 
