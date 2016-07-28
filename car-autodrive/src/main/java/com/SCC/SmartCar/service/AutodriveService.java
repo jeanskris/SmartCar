@@ -2,6 +2,7 @@ package com.SCC.SmartCar.service;
 
 import com.SCC.SmartCar.dao.RedisDao;
 import com.SCC.SmartCar.model.Coordinate;
+import com.SCC.SmartCar.model.IOConstants;
 import com.SCC.SmartCar.model.Map;
 import com.SCC.SmartCar.model.Path;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ import java.util.List;
 public class AutodriveService implements IAutodriveService {
     @Autowired
     RedisDao redisDao;
+    @Autowired
+    CarIoService carIoService;
 
     public int createPath(int carId, Coordinate currentPositState, Coordinate end, Map map){
         Path path=new Path();
@@ -30,13 +33,13 @@ public class AutodriveService implements IAutodriveService {
         int len=200;
         for(int i=0;i<len;i++){
             coordinate.setX(coordinate.getX() + 1);
-            coordinate.setY(coordinate.getY());
+            coordinate.setY(coordinate.getY() - 1);
             Coordinate co=new Coordinate();
             co.setX(coordinate.getX());
             co.setY(coordinate.getY());
             points.add(co);
 
-            //闭环
+            //矩形闭环
             /*if(i<len/4) {
                 coordinate.setX(coordinate.getX());
                 coordinate.setY(coordinate.getY() + 1);
@@ -70,6 +73,8 @@ public class AutodriveService implements IAutodriveService {
         path.setPoints(points);
         redisDao.savePath(String.valueOf(carId),path);
         System.out.println("createPath!");
+        carIoService.sendAutoJsonCommand(carId, IOConstants.FORWARD_MANUAL);
     return path.getPathId();
     }
+
 }

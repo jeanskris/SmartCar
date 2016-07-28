@@ -38,6 +38,7 @@
     <orderEntry type="library" name="Maven: org.springframework:spring-websocket:4.2.5.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-messaging:4.2.5.RELEASE" level="project" />
     <orderEntry type="module" module-name="car-model" />
+    <orderEntry type="module" module-name="car-autodrive" />
     <orderEntry type="module" module-name="car-IO" />
     <orderEntry type="module" module-name="car-database" />
     <orderEntry type="module" module-name="redis" />

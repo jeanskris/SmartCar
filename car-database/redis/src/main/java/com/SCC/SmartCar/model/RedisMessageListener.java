@@ -17,16 +17,10 @@ public class RedisMessageListener implements MessageListener {
         CarRuntimeInfo carRuntimeInfo=null;
         try {
             json = new JSONObject(message.toString());ObjectMapper mapper = new ObjectMapper();
-
             carRuntimeInfo= mapper.readValue(json.toString(),CarRuntimeInfo.class);
-
         }catch (Exception e){
             e.printStackTrace();
         }
-
-
-        /*CarRuntimeInfo carRuntimeInfo=(CarRuntimeInfo)message;
-        System.out.println( "carRuntimeInfo:"+  carRuntimeInfo.toString() );*/
         System.out.println( "Message received:"+  message.toString() );
     }
 }

@@ -42,20 +42,24 @@ public class CarHandler {
     public void carRuntimeInfo( JSONObject json) throws Exception{
         //put data to carBasic message QUENE
         Date receivedTime=new Date(System.currentTimeMillis());
+
         DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
         CarRuntimeInfo carRuntimeInfo = new CarRuntimeInfo();
         carRuntimeInfo.setAcceleration((Double)json.get("Acceleration"));
-        carRuntimeInfo.setAngel((Integer)json.get("angel"));
+        carRuntimeInfo.setAngel((Double) json.get("angel"));
         carRuntimeInfo.setCarId((Integer)json.get("carId"));
         carRuntimeInfo.setCoordinate(new Coordinate((Double)json.get("location_x"),(Double)json.get("location_y")));
-        carRuntimeInfo.setSpeed((Integer)json.get("speed_current"));
+        carRuntimeInfo.setSpeed((Double) json.get("speed_current"));
         carRuntimeInfo.setCurrentTime(sdf.parse(json.get("currentTime").toString()).getTime());
+
+
         //redisDao.delete(Integer.toString((Integer)json.get("carId")));
         //carRuntimeInfo= (CarRuntimeInfo)redisDao.LPop("0");
         redisDao.LPush("carRuntimeInfo_list:"+Integer.toString((Integer)json.get("carId")),carRuntimeInfo);
 
         List<CarRuntimeInfo> list=(List<CarRuntimeInfo>)redisDao.LRange("carRuntimeInfo_list:"+Integer.toString((Integer)json.get("carId")),0,-1);
         redisPublisher.Publish(Integer.toString((Integer)json.get("carId"))+":topic",carRuntimeInfo);
+
         try {
 
             String currentTime=json.get("currentTime").toString();

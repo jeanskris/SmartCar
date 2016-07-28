@@ -1,10 +1,12 @@
 package com.SCC.SmartCar.service;
 
+import com.SCC.SmartCar.dao.RedisDao;
 import com.SCC.SmartCar.model.HttpRequest;
 import com.SCC.SmartCar.model.Map;
 import com.SCC.SmartCar.model.config.ServerConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,6 +14,9 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class EnvironmentService implements IEnvironmentService {
+    @Autowired
+    RedisDao redisDao;
+
     public Map getMap(int mapid){
         HttpRequest hr=new HttpRequest();
         Map map=null;
@@ -23,6 +28,7 @@ public class EnvironmentService implements IEnvironmentService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        redisDao.save("mapId:"+mapid,map);
         return map;
 
     }

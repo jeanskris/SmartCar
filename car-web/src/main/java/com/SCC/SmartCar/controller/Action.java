@@ -48,9 +48,13 @@ public class Action {
     }
     @RequestMapping(value = "/getCurrentPosition", method = RequestMethod.GET)
     public Coordinate mouseClickPoint() {
+       // System.out.println("mapId:");
        // CarRuntimeInfo carRuntimeInfo=(CarRuntimeInfo)redisDao.LRange("carRuntimeInfo_list:"+"1",0,1).get(0);
         CarRuntimeInfo carRuntimeInfo=(CarRuntimeInfo)redisDao.LIndex("carRuntimeInfo_list:"+"1",0);
         Coordinate coordinate=carRuntimeInfo.getCoordinate();
+        Map map=(Map)redisDao.read("mapId:"+1);//AutoPark服务器获取当前地图Id，然后将Id发送给这儿请求对应的mapping。
+        coordinate.setX(coordinate.getX()-map.getMappingX());
+        coordinate.setY(coordinate.getY()-map.getMappingY());
         return coordinate;
     }
     //获取前台设置的起始点和终点，将路径发送给车服务器生成路径并解析成指令
