@@ -36,6 +36,9 @@ public class Path implements Serializable {
     public void setPoints(List<Coordinate> points) {
         this.points = points;
     }
+    public String toString(){
+        return  "carId:"+this.getCarId()+"PathId:"+this.getPathId();
 
+    }
 
 }

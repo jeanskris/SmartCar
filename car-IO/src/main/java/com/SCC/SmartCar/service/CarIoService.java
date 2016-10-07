@@ -2,6 +2,7 @@ package com.SCC.SmartCar.service;
 
 import com.SCC.SmartCar.mina.SessionMap;
 import com.SCC.SmartCar.model.Command;
+import com.SCC.SmartCar.model.CommandTestCar;
 import com.SCC.SmartCar.utils.Utils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
@@ -30,6 +31,39 @@ public class CarIoService {
         System.out.println("bytes sendCommand:"+IoBuffer.wrap(bytes));
         logger.debug("bytes sendCommand:"+IoBuffer.wrap(bytes));
     }
+    //沙盘模型小车的指令发送
+    public void sendAutoJsonCommandToTestCar(int carId, String mode, int direction, int speed){
+        try{
+
+            //! edited by Yang
+            int direc=0;
+            int spd=0;
+            Date currentTime=new Date(System.currentTimeMillis());
+            DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
+            String strTime = sdf.format(currentTime);
+            CommandTestCar command=new CommandTestCar();
+            command.setMode(mode);
+            if(mode!="latency"){
+                direc=direction;
+                spd=speed;
+            }
+            command.setDirection(direc);
+            command.setSpeed(spd);
+            command.setTime(strTime);
+            SessionMap sessionMap = SessionMap.getInstance();
+            IoSession session=sessionMap.getSessionByAttribute("carId",carId);
+            JSONObject jsonObject=new JSONObject(command);
+            String j=jsonObject.toString();
+            byte[] bytes=j.getBytes();
+            session.write(IoBuffer.wrap(bytes));
+            System.out.println("bytes sendAutoJsonCommandToTestCar Time:"+strTime);
+            logger.debug("bytes sendAutoJsonCommandToTestCar:"+IoBuffer.wrap(bytes));
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     public void sendAutoJsonCommand(int carId,byte[] message){
         try{
 

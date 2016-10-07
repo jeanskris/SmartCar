@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,7 +34,7 @@ public class Action {
     @RequestMapping(value = "/startAutoPark", method = RequestMethod.GET)
     public void startAutoPark(){
         logger.debug("run");
-        carService.sendCommand(1,IOConstants.RUN);
+        //carService.sendCommand(1,IOConstants.RUN);//沙盘！！ 不是沙盘去掉注释
     }
 
     @RequestMapping(value = "/forward", method = RequestMethod.GET)
@@ -55,16 +56,25 @@ public class Action {
         Map map=(Map)redisDao.read("mapId:"+1);//AutoPark服务器获取当前地图Id，然后将Id发送给这儿请求对应的mapping。
         coordinate.setX(coordinate.getX()-map.getMappingX());
         coordinate.setY(coordinate.getY()-map.getMappingY());
+        System.out.println("getCurrentPosition:" +coordinate.getX()+ "," + coordinate.getY());
         return coordinate;
     }
     //获取前台设置的起始点和终点，将路径发送给车服务器生成路径并解析成指令
     @RequestMapping(value = "/startAuto", method = RequestMethod.POST)
     public Path startAuto(@RequestBody Trip trip) {
+        CarRuntimeInfo carRuntimeInfo=(CarRuntimeInfo)redisDao.LIndex("carRuntimeInfo_list:"+"1",0);//沙盘小车接口
+        Coordinate startPoint=carRuntimeInfo.getCoordinate();//沙盘小车接口 用当前位置作为起始位置
         Map map=environmentService.getMap(trip.getMapID());
-        int pathId=autodriveService.createPath(trip.getCarId(),trip.getStartPoint(),trip.getEndPoint(),map);
+        startPoint.setX(startPoint.getX()-map.getMappingX());//沙盘小车接口
+        startPoint.setY(startPoint.getY()-map.getMappingY());//沙盘小车接口
+        int pathId=autodriveService.createPath(trip.getCarId(),startPoint,trip.getEndPoint(),map);//获取路径并返回停车，这部分要迁移到停车应用上。
         Path path=(Path)redisDao.readPath(String.valueOf(trip.getCarId()));
-        List<Coordinate> points =path.getPoints();
-        System.out.println("path:" + trip.getStartPoint().toString() + "," + trip.getEndPoint().toString()+" mapID:"+trip.getMapID());
+        System.out.println("startAuto path:" +startPoint.toString() + " , " + trip.getEndPoint().toString()+" mapID:"+trip.getMapID());
+        System.out.println("startAuto path:"+path.toString());
+        List<Coordinate> points=new ArrayList<Coordinate>();
+        points.add(startPoint);
+        points.add(trip.getEndPoint());
+        autodriveService.autoDriving(map,points,trip.getCarId());
         return  path;
     }
 

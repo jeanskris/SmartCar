@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.net.InetSocketAddress;
+import java.util.Date;
 
 @Component("tcpServerHandler")
 public class TCPServerHandler extends IoHandlerAdapter {
@@ -27,7 +28,7 @@ public class TCPServerHandler extends IoHandlerAdapter {
 
     @Override
     public void messageReceived(IoSession session, Object message) throws Exception {
-
+        Date receivedTime=new Date(System.currentTimeMillis());
         if (message instanceof IoBuffer) {
             IoBuffer buffer = (IoBuffer) message;
             buffer.setAutoShrink(true);
@@ -36,8 +37,6 @@ public class TCPServerHandler extends IoHandlerAdapter {
             buffer.get(bytes);
             JSONObject json = new JSONObject(new String(bytes));
             String type=(String )json.get("type");
-
-
 
             if(type.equals("carBasic")){
 
@@ -52,7 +51,10 @@ public class TCPServerHandler extends IoHandlerAdapter {
             }else if(type.equals("init")){
                 session.setAttribute("carId",json.get("carId"));
                 System.out.println("init:"+json.toString());
-                //put data to runInfo
+                carHandler.returnTime((Integer)json.get("carId"));
+            }else if(type.equals("latency")){
+                System.out.println("latency:"+json.toString());
+                carHandler.calLatency(receivedTime,json);
             }
 
 

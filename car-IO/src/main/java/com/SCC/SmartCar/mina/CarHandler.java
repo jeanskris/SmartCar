@@ -65,8 +65,8 @@ public class CarHandler {
             String currentTime=json.get("currentTime").toString();
             Date date = sdf.parse(currentTime);
             long delay=(receivedTime.getTime()-date.getTime());
-            System.out.println("receivedTime="+receivedTime.toString());
-            System.out.println("json.get="+date.toString());
+            System.out.println("receivedDataTime="+receivedTime.toString());
+            System.out.println("json.getTime="+date.toString());
             System.out.println("delay="+delay);
         } catch (Exception e) {
             e.printStackTrace();
@@ -75,7 +75,36 @@ public class CarHandler {
     }
 
 
+    public void returnTime(Integer carId){
+        carIoService.sendAutoJsonCommandToTestCar(carId,"latency", 0,0);//发送系统当前时间
+        System.out.println("=====Latency Test=====:sendAutoJsonCommandToTestCar");
 
+    }
+    double sum=0.0;
+    int cirTimes=0;
+    public void calLatency(Date receivedTime,JSONObject json){
+        cirTimes++;
+        if(cirTimes<1000){
+            try {
+                DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
+                String sendDataTime=json.get("time").toString();
+                Date date = sdf.parse(sendDataTime);
+                double delay=((double)(receivedTime.getTime()-date.getTime()))/2;
+                /*System.out.println("=====Latency Test=====:sendTime="+date.toString());
+                System.out.println("=====Latency Test=====:receivedTime="+receivedTime.toString());*/
+                System.out.println("=====Latency Test=====:delay="+delay);
+                returnTime((Integer)json.get("carId"));
+                sum+=delay;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }else{
+            System.out.println("=====AVG Latency Test=====:delay="+sum/1000);
+            sum=0;
+            cirTimes=0;
+        }
+
+    }
 /*    public void sendMessage(final javax.jms.Destination destination, final Serializable obj) {
         System.out.println("---------------生产者发送消息-----------------:"+obj.toString());
         jmsTemplate.send(destination, new MessageCreator() {
