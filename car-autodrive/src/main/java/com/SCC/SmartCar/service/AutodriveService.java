@@ -129,6 +129,7 @@ public class AutodriveService implements IAutodriveService {
         Path readPath=(Path)redisDao.readPath(String.valueOf(carId));
         System.out.println(readPath.toString());
         System.out.println("createPath!");
+        System.out.println("test!");
        // carIoService.sendAutoJsonCommand(carId, IOConstants.FORWARD_MANUAL);//不用于沙盘
     return path.getPathId();
     }
