@@ -31,34 +31,56 @@ public class CarIoService {
         System.out.println("bytes sendCommand:"+IoBuffer.wrap(bytes));
         logger.debug("bytes sendCommand:"+IoBuffer.wrap(bytes));
     }
+
     //沙盘模型小车的指令发送
     public void sendAutoJsonCommandToTestCar(int carId, String mode, int direction, int speed){
         try{
-
             //! edited by Yang
-            int direc=0;
-            int spd=0;
-            Date currentTime=new Date(System.currentTimeMillis());
+            Date currentTime = new Date(System.currentTimeMillis());
             DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
             String strTime = sdf.format(currentTime);
-            CommandTestCar command=new CommandTestCar();
+
+            CommandTestCar command = new CommandTestCar();
             command.setMode(mode);
-            if(mode!="latency"){
-                direc=direction;
-                spd=speed;
-            }
-            command.setDirection(direc);
-            command.setSpeed(spd);
+            command.setDirection(direction);
+            command.setSpeed(speed);
             command.setTime(strTime);
+
+            JSONObject jsonObject=new JSONObject(command);
+            String j=jsonObject.toString();
+            byte[] bytes=j.getBytes();
+
             SessionMap sessionMap = SessionMap.getInstance();
             IoSession session=sessionMap.getSessionByAttribute("carId",carId);
+            session.write(IoBuffer.wrap(bytes));
+
+            System.out.println("bytes sendAutoJsonCommandToTestCar Time:"+strTime);
+            logger.debug("bytes sendAutoJsonCommandToTestCar:"+IoBuffer.wrap(bytes));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    //沙盘模型小车的指令发送
+    public void sendAutoJsonCommandToTestCarV2(IoSession session, String mode, int direction, int speed){
+        try{
+            //! edited by Yang
+            Date currentTime = new Date(System.currentTimeMillis());
+            DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
+            String strTime = sdf.format(currentTime);
+
+            CommandTestCar command = new CommandTestCar();
+            command.setMode(mode);
+            command.setDirection(direction);
+            command.setSpeed(speed);
+            command.setTime(strTime);
+
             JSONObject jsonObject=new JSONObject(command);
             String j=jsonObject.toString();
             byte[] bytes=j.getBytes();
             session.write(IoBuffer.wrap(bytes));
+
             System.out.println("bytes sendAutoJsonCommandToTestCar Time:"+strTime);
             logger.debug("bytes sendAutoJsonCommandToTestCar:"+IoBuffer.wrap(bytes));
-
         }catch (Exception e){
             e.printStackTrace();
         }
