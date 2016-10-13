@@ -53,7 +53,14 @@ public class SessionMap {
         log.debug("保存会话到SessionMap单例---key=" + key);
         this.map.put(key, session);
     }
-
+    /**
+     * @Description: 删除session会话
+     * @since JDK1.6
+     */
+    public void deleteSession(String key){
+        log.debug("删除session会话:" + key);
+        this.map.remove(key);
+    }
     /**
      * @Description: 根据key查找缓存的session
      */

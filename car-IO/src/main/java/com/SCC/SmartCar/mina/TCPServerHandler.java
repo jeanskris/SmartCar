@@ -1,7 +1,6 @@
 package com.SCC.SmartCar.mina;
 
 
-import com.SCC.SmartCar.model.IOConstants;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
@@ -51,7 +50,7 @@ public class TCPServerHandler extends IoHandlerAdapter {
             }else if(type.equals("init")){
                 session.setAttribute("carId",json.get("carId"));
                 System.out.println("init:"+json.toString());
-                carHandler.returnTime((Integer)json.get("carId"));
+//                carHandler.returnTime((Integer)json.get("carId"));
             }else if(type.equals("latency")){
                 System.out.println("latency:"+json.toString());
                 carHandler.calLatency(receivedTime,json);
@@ -77,17 +76,22 @@ public class TCPServerHandler extends IoHandlerAdapter {
         super.sessionCreated(session);
         InetSocketAddress address =(InetSocketAddress)session.getRemoteAddress();
       //  String clientIP = ((InetSocketAddress)session.getRemoteAddress()).getAddress().getHostAddress();
-        IOConstants.TCP_REMOTE_SERVER_IP=address.getAddress().toString().substring(1);
+        String TCP_REMOTE_SERVER_IP=address.getAddress().toString().substring(1);
         //Constant.TCP_REMOTE_SERVER_PORT=address.getPort();
-        logger.debug("sessionCreated, TCP_REMOTE_SERVER_IP: " +   IOConstants.TCP_REMOTE_SERVER_IP);
-        System.out.println("sessionCreated,TCP_REMOTE_SERVER_IP: " +   IOConstants.TCP_REMOTE_SERVER_IP);
+        logger.debug("sessionCreated, TCP_REMOTE_SERVER_IP: " +   TCP_REMOTE_SERVER_IP);
+        System.out.println("sessionCreated,TCP_REMOTE_SERVER_IP: " +   TCP_REMOTE_SERVER_IP);
         //保存客户端的会话session
         SessionMap sessionMap = SessionMap.getInstance();
-        sessionMap.addSession(IOConstants.TCP_REMOTE_SERVER_IP, session);
+        sessionMap.addSession(TCP_REMOTE_SERVER_IP, session);
     }
     @Override
     public void sessionClosed(IoSession session) throws Exception {
         System.out.println("Server sessionClosed" );
+        InetSocketAddress address =(InetSocketAddress)session.getRemoteAddress();
+        //  String clientIP = ((InetSocketAddress)session.getRemoteAddress()).getAddress().getHostAddress();
+       String TCP_REMOTE_SERVER_IP=address.getAddress().toString().substring(1);
+        SessionMap sessionMap=SessionMap.getInstance();
+        sessionMap.deleteSession(TCP_REMOTE_SERVER_IP);
     }
 
     @Override
