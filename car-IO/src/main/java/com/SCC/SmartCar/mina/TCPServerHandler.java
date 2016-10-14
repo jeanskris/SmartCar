@@ -82,16 +82,20 @@ public class TCPServerHandler extends IoHandlerAdapter {
         System.out.println("sessionCreated,TCP_REMOTE_SERVER_IP: " +   TCP_REMOTE_SERVER_IP);
         //保存客户端的会话session
         SessionMap sessionMap = SessionMap.getInstance();
+        session.setAttribute("carIP",TCP_REMOTE_SERVER_IP);//session 存在map中的key为carip,carip又作为属性存在session中。
         sessionMap.addSession(TCP_REMOTE_SERVER_IP, session);
     }
     @Override
     public void sessionClosed(IoSession session) throws Exception {
         System.out.println("Server sessionClosed" );
+        //session.getService().dispose(true);//test disconnect with client  程序中调用该函数。服务器主动关掉连接后，执行TCPserverHAndler的sessionClosed()函数
+
         InetSocketAddress address =(InetSocketAddress)session.getRemoteAddress();
         //  String clientIP = ((InetSocketAddress)session.getRemoteAddress()).getAddress().getHostAddress();
        String TCP_REMOTE_SERVER_IP=address.getAddress().toString().substring(1);
         SessionMap sessionMap=SessionMap.getInstance();
         sessionMap.deleteSession(TCP_REMOTE_SERVER_IP);
+        System.out.println(" sessionMap.deleteSession:"+ TCP_REMOTE_SERVER_IP);
     }
 
     @Override

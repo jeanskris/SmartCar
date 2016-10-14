@@ -30,6 +30,8 @@ public class AutodriveService implements IAutodriveService {
                 while(true) {
                     IoSession session=sessionMap.getSessionByAttribute("carId",carId);
                     if(session==null)break;
+                    //session.getService().dispose(true);//test disconnect with client  服务器主动关掉连接后，执行TCPserverHAndler的sessionClosed()函数
+
                     // get car current position
                     // 轨迹是否已经经过处理？轨迹点的参考系应该与定位点的参考系保持一致
                     CarRuntimeInfo carRuntimeInfo = (CarRuntimeInfo)redisDao.LIndex("carRuntimeInfo_list:"+"1",0);
@@ -39,30 +41,33 @@ public class AutodriveService implements IAutodriveService {
                     carRuntimeInfo.setCoordinate(point);
                     Coordinate nextPoint = findNextPoint(carRuntimeInfo.getCoordinate(), trajectory);
 
-                    System.out.println("cur point is: [" + point.getX() + " , " + point.getY() +
-                            "], next point is: [" + nextPoint.getX() + " , " + nextPoint.getY() + "]");
+//                    System.out.println("cur point is: [" + point.getX() + " , " + point.getY() +
+//                            "], next point is: [" + nextPoint.getX() + " , " + nextPoint.getY() + "]");
 
                     if (nextPoint == trajectory.get(trajectory.size() - 1)) {
-                        if (finalControl(session, carRuntimeInfo, nextPoint, threshold)) break;
+                        if (finalControl(session, carRuntimeInfo, nextPoint, threshold)){//行程结束后告诉车已经结束。
+                            break;
+                        }
                     } else {
                         lateralControl(session, carRuntimeInfo, nextPoint);
                     }
 
                     try {
-                        Thread.sleep(10);
+                        Thread.sleep(200);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
+                System.out.println("auto driving sucessfully");
             }
         });
         t.start();
-        System.out.println("auto driving sucessfully");
     }
 
     public boolean lateralControl(IoSession session, CarRuntimeInfo info, Coordinate nextPoint) {
         Coordinate curPoint = info.getCoordinate();
         double nextAngle;
+
         // !!! map: up increases y, right increases x
         // angle to next point before
         if (nextPoint.getY() < curPoint.getY()) {
@@ -73,15 +78,13 @@ public class AutodriveService implements IAutodriveService {
             nextAngle = Math.atan((curPoint.getX() - nextPoint.getX()) / (curPoint.getY() - nextPoint.getY()));
             nextAngle = nextAngle * 180 / Math.PI;
         }
+
         // angle to next point after calculating self-angle
         double diffAngle = info.getAngel() - nextAngle;
-        System.out.println("info angle: " + info.getAngel() +
-                ",next angle:" + nextAngle +
-                ", diff angle: " + diffAngle);
+        System.out.println("info angle: " + info.getAngel() + ",next angle:" + nextAngle + ", diff angle: " + diffAngle);
         // send command
         int speed = 2;
         carIoService.sendAutoJsonCommandToTestCarV2(session, "command", (int)diffAngle, speed);
-
 
         return true;
     }
@@ -89,6 +92,7 @@ public class AutodriveService implements IAutodriveService {
     public boolean finalControl(IoSession session, CarRuntimeInfo info, Coordinate nextPoint, double threshold) {
         if (calcDist(info.getCoordinate(), nextPoint) < threshold) {
             carIoService.sendAutoJsonCommandToTestCarV2(session, "command", 0, 0);
+            carIoService.sendAutoJsonCommandToTestCarV2(session, "close", 0, 0);
             return true;
         } else {
             lateralControl(session, info, nextPoint);
@@ -108,7 +112,7 @@ public class AutodriveService implements IAutodriveService {
                 minIndex = i;
             }
         }
-
+        System.out.println("[autoDriving] dist to next point:" + minDist + "[cm]");
         if (minIndex == trajectory.size() - 1) {
             return trajectory.get(trajectory.size() - 1);
         }
