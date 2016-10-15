@@ -2,9 +2,12 @@ package com.SCC.SmartCar.controller;
 
 import com.SCC.SmartCar.dao.RedisDao;
 import com.SCC.SmartCar.model.*;
+import com.SCC.SmartCar.model.config.ServerConfig;
 import com.SCC.SmartCar.service.CarIoService;
 import com.SCC.SmartCar.service.IAutodriveService;
 import com.SCC.SmartCar.service.IEnvironmentService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,12 +51,26 @@ public class Action {
         }
     }
     @RequestMapping(value = "/getCurrentPosition", method = RequestMethod.GET)
-    public Coordinate mouseClickPoint() {
+    public Coordinate getCurrentPosition() {
        // System.out.println("mapId:");
        // CarRuntimeInfo carRuntimeInfo=(CarRuntimeInfo)redisDao.LRange("carRuntimeInfo_list:"+"1",0,1).get(0);
         CarRuntimeInfo carRuntimeInfo=(CarRuntimeInfo)redisDao.LIndex("carRuntimeInfo_list:"+"1",0);
         Coordinate coordinate=carRuntimeInfo.getCoordinate();
-        Map map=(Map)redisDao.read("mapId:"+1);//AutoPark服务器获取当前地图Id，然后将Id发送给这儿请求对应的mapping。
+        HttpRequest hr=new HttpRequest();
+        Map map=new Map();
+        map=(Map)redisDao.read("mapId:"+1);
+        if(redisDao.read("smartCarMapId:"+1)==null) {
+            try {
+                JSONObject result=hr.sendGet(ServerConfig.ENVIRONMENT_SERVER+"getMap?mapId="+1,"");
+                ObjectMapper mapper=new ObjectMapper();
+                map= mapper.readValue(result.toString(),Map.class);
+                redisDao.save("smartCarMapId:"+1,map);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }else{
+            map=(Map)redisDao.read("smartCarMapId:"+1);
+        }
         coordinate.setX(coordinate.getX()-map.getMappingX());
         coordinate.setY(coordinate.getY()-map.getMappingY());
 //        System.out.println("getCurrentPosition:" +coordinate.getX()+ "," + coordinate.getY());

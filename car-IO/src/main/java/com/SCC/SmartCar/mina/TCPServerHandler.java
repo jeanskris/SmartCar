@@ -44,7 +44,7 @@ public class TCPServerHandler extends IoHandlerAdapter {
                 carHandler.carBasic(json);
 
             }else if(type.equals("runInfo")){
-                System.out.println("runInfo:"+json.toString());
+                //System.out.println("runInfo:"+json.toString());
                 //put data to runInfo
                 carHandler.carRuntimeInfo(json);
             }else if(type.equals("init")){

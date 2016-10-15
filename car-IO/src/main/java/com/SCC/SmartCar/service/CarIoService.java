@@ -42,8 +42,6 @@ public class CarIoService {
 
             CommandTestCar command = new CommandTestCar();
             command.setMode(mode);
-            command.setDirection(direction);
-            command.setSpeed(speed);
             command.setTime(strTime);
 
             JSONObject jsonObject=new JSONObject(command);
@@ -60,19 +58,25 @@ public class CarIoService {
             e.printStackTrace();
         }
     }
-    //沙盘模型小车的指令发送
+
+    //! edited by Yang, control the mbot car
     public void sendAutoJsonCommandToTestCarV2(IoSession session, String mode, int direction, int speed){
         try{
-            //! edited by Yang
+            CommandTestCar command = new CommandTestCar();
+
             Date currentTime = new Date(System.currentTimeMillis());
             DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
             String strTime = sdf.format(currentTime);
-
-            CommandTestCar command = new CommandTestCar();
-            command.setMode(mode);
-            command.setDirection(direction);
-            command.setSpeed(speed);
             command.setTime(strTime);
+
+            command.setMode(mode);
+
+            //!!! because of map rotation
+            direction = -direction;
+            int left = speed * 120 - direction / 2;
+            int right = speed * 120 + direction / 2;
+            command.setLeft(left);
+            command.setRight(right);
 
             JSONObject jsonObject=new JSONObject(command);
             String j=jsonObject.toString();

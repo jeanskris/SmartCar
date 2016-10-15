@@ -21,7 +21,7 @@ public class RedisMessageListener implements MessageListener {
         }catch (Exception e){
             e.printStackTrace();
         }
-        System.out.println( "Message received:"+  message.toString() );
+       // System.out.println( "Message received:"+  message.toString() );
     }
 }
 

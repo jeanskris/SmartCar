@@ -11,8 +11,8 @@ import java.io.Serializable;
 @Repository
 public class CommandTestCar implements Serializable{
     String mode;
-    int direction;
-    int speed;
+    int left;
+    int right;
     String time;
     public String getMode() {
         return mode;
@@ -27,20 +27,21 @@ public class CommandTestCar implements Serializable{
         this.time = time;
     }
 
-    public int getSpeed() {
-        return speed;
+    public int getLeft() {
+        return left;
     }
 
-    public void setSpeed(int speed) {
-        this.speed = speed;
+    public void setLeft(int left) {
+        this.left = left;
     }
 
-    public int getDirection() {
-        return direction;
+    public int getRight() {
+        return right;
     }
 
-    public void setDirection(int direction) {
-        this.direction = direction;
+    public void setRight(int right) {
+        this.right = right;
     }
+
 
 }

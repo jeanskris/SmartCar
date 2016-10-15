@@ -59,7 +59,7 @@ public class CarHandler {
 
         List<CarRuntimeInfo> list=(List<CarRuntimeInfo>)redisDao.LRange("carRuntimeInfo_list:"+Integer.toString((Integer)json.get("carId")),0,-1);
         redisPublisher.Publish(Integer.toString((Integer)json.get("carId"))+":topic",carRuntimeInfo);
-
+/*
         try {
 
             String currentTime=json.get("currentTime").toString();
@@ -70,7 +70,7 @@ public class CarHandler {
             System.out.println("delay="+delay);
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
 
     }
 

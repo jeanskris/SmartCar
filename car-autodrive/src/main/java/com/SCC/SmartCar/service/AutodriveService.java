@@ -23,7 +23,7 @@ public class AutodriveService implements IAutodriveService {
     public void autoDriving(final Map map, final List<Coordinate> trajectory, final int carId) {
         Thread t = new Thread(new Runnable(){
             public void run(){
-                double threshold = 10; //纠偏允许误差，暂时为1
+                double threshold = 10; //目标距离允许误差，暂时为10cm
                 System.out.println("trajectory is:" + trajectory);
                 SessionMap sessionMap=SessionMap.getInstance();
 
@@ -53,7 +53,7 @@ public class AutodriveService implements IAutodriveService {
                     }
 
                     try {
-                        Thread.sleep(200);
+                        Thread.sleep(100);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -83,7 +83,7 @@ public class AutodriveService implements IAutodriveService {
         double diffAngle = info.getAngel() - nextAngle;
         System.out.println("info angle: " + info.getAngel() + ",next angle:" + nextAngle + ", diff angle: " + diffAngle);
         // send command
-        int speed = 2;
+        int speed = 1;
         carIoService.sendAutoJsonCommandToTestCarV2(session, "command", (int)diffAngle, speed);
 
         return true;
